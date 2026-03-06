@@ -75,7 +75,7 @@ def main(args=None):
     start_epoch = 0
     if parser.resume is not None:
         print("Loading checkpoint:", parser.resume)
-        retinanet = torch.load(parser.resume)
+        retinanet = torch.load(parser.resume, weights_only=False)
         start_epoch = int(parser.resume.split("_")[-1].split(".")[0]) + 1
     else:
         if parser.depth == 18:
