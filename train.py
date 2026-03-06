@@ -166,8 +166,8 @@ def main(args=None):
 
         scheduler.step(np.mean(epoch_loss))
 
-        if (epoch_num % 10 == 0) or (epoch_num == parser.epochs - 1):
-            torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
+        
+        torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
 
     retinanet.eval()
 
