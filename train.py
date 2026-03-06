@@ -14,8 +14,6 @@ from torch.utils.data import DataLoader
 from retinanet import coco_eval
 from retinanet import csv_eval
 
-# assert torch.__version__.split('.')[0] == '1'
-
 print('CUDA available: {}'.format(torch.cuda.is_available()))
 
 
@@ -167,11 +165,11 @@ def main(args=None):
 
         scheduler.step(np.mean(epoch_loss))
 
-        torch.save(retinanet.module, '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
+        torch.save(retinanet.module.state_dict(), '{}_retinanet_{}.pt'.format(parser.dataset, epoch_num))
 
     retinanet.eval()
 
-    torch.save(retinanet, 'model_final.pt')
+    torch.save(retinanet.state_dict(), 'model_final.pt')
 
 
 if __name__ == '__main__':

@@ -41,7 +41,7 @@ def preprocess_image(image_path):
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = torch.load("model_final_1.pt", map_location=device, weights_only=False)
+model = torch.load("model_final_224.pt", map_location=device, weights_only=False)
 
 if hasattr(model, "module"):
     model = model.module
@@ -49,10 +49,13 @@ if hasattr(model, "module"):
 model = model.to(device)
 model.eval()
 
+torch.save(model.state_dict(), "model_weight.pth")
+print("Save ok!")
 
 
 
-img, scale, img_orig = preprocess_image("000000000009.jpg")
+
+img, scale, img_orig = preprocess_image("C:\\Users\\ThoiToan\\Desktop\\Workspace\\reference\\pytorch-retinanet\\images\\000000000030.jpg")
 img = img.to(device)
 
 with torch.no_grad():

@@ -44,16 +44,19 @@ class PyramidFeatures(nn.Module):
     def forward(self, inputs):
         C3, C4, C5 = inputs
 
+        # breakpoint()
         P5_x = self.P5_1(C5)
         P5_upsampled_x = self.P5_upsampled(P5_x)
         P5_x = self.P5_2(P5_x)
-
+   
         P4_x = self.P4_1(C4)
         P4_x = P5_upsampled_x + P4_x
         P4_upsampled_x = self.P4_upsampled(P4_x)
         P4_x = self.P4_2(P4_x)
 
+
         P3_x = self.P3_1(C3)
+        print("Qua conv dau tien: ", P3_x)
         P3_x = P3_x + P4_upsampled_x
         P3_x = self.P3_2(P3_x)
 
@@ -62,6 +65,7 @@ class PyramidFeatures(nn.Module):
         P7_x = self.P7_1(P6_x)
         P7_x = self.P7_2(P7_x)
 
+        print("P3_x:", P3_x)
         return [P3_x, P4_x, P5_x, P6_x, P7_x]
 
 
@@ -140,6 +144,8 @@ class ClassificationModel(nn.Module):
         out = self.act4(out)
 
         out = self.output(out)
+
+        # print("Before sigmoid:", out)
         out = self.output_act(out)
 
         # out is B x C x W x H, with C = n_classes + n_anchors
@@ -234,7 +240,7 @@ class ResNet(nn.Module):
             img_batch, annotations = inputs
         else:
             img_batch = inputs
-        print("DEBUG: ", img_batch.shape)
+        #print("DEBUG - input shape:", img_batch.shape)
         x = self.conv1(img_batch)
         x = self.bn1(x)
         x = self.relu(x)
@@ -246,13 +252,15 @@ class ResNet(nn.Module):
         x4 = self.layer4(x3)
 
         features = self.fpn([x2, x3, x4])
-
+        #print("DEBUG:\n", x2)
         regression = torch.cat([self.regressionModel(feature) for feature in features], dim=1)
 
         classification = torch.cat([self.classificationModel(feature) for feature in features], dim=1)
 
         anchors = self.anchors(img_batch)
 
+
+        #print("DEBUG - Raw output shapes: ", classification.shape, regression.shape, anchors.shape)
 
         if self.training:
             return self.focalLoss(classification, regression, anchors, annotations)
