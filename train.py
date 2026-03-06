@@ -28,6 +28,7 @@ def main(args=None):
 
     parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=50)
     parser.add_argument('--epochs', help='Number of epochs', type=int, default=100)
+    parser.add_argument('--resume', help='Checkpoint path', default=None)
 
     parser = parser.parse_args(args)
 
@@ -71,18 +72,27 @@ def main(args=None):
         dataloader_val = DataLoader(dataset_val, num_workers=3, collate_fn=collater, batch_sampler=sampler_val)
 
     # Create the model
-    if parser.depth == 18:
-        retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
-    elif parser.depth == 34:
-        retinanet = model.resnet34(num_classes=dataset_train.num_classes(), pretrained=True)
-    elif parser.depth == 50:
-        retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
-    elif parser.depth == 101:
-        retinanet = model.resnet101(num_classes=dataset_train.num_classes(), pretrained=True)
-    elif parser.depth == 152:
-        retinanet = model.resnet152(num_classes=dataset_train.num_classes(), pretrained=True)
+    start_epoch = 0
+    if parser.resume is not None:
+        print("Loading checkpoint:", parser.resume)
+        retinanet = torch.load(parser.resume)
+        start_epoch = int(parser.resume.split("_")[-1].split(".")[0]) + 1
     else:
-        raise ValueError('Unsupported model depth, must be one of 18, 34, 50, 101, 152')
+        if parser.depth == 18:
+            retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
+        elif parser.depth == 34:
+            retinanet = model.resnet34(num_classes=dataset_train.num_classes(), pretrained=True)
+        elif parser.depth == 50:
+            retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
+        elif parser.depth == 101:
+            retinanet = model.resnet101(num_classes=dataset_train.num_classes(), pretrained=True)
+        elif parser.depth == 152:
+            retinanet = model.resnet152(num_classes=dataset_train.num_classes(), pretrained=True)
+        else:
+            raise ValueError('Unsupported model depth, must be one of 18, 34, 50, 101, 152')
+
+    #resume trainning
+
 
     use_gpu = True
 
@@ -108,7 +118,9 @@ def main(args=None):
 
     print('Num training images: {}'.format(len(dataset_train)))
 
-    for epoch_num in range(parser.epochs):
+    
+    
+    for epoch_num in range(start_epoch, parser.epochs):
 
         retinanet.train()
         retinanet.module.freeze_bn()
