@@ -106,9 +106,9 @@ def detect_image(image_path, model_path, class_list, raw_output=False):
 
             st = time.time()
 
-            torch.manual_seed(42)
+            #torch.manual_seed(42)
             # image = torch.empty(8,3,224,224).uniform_(-5,5)
-            image = image.repeat(8,1,1,1)
+            #image = image.repeat(8,1,1,1)
             print(image)
             if (raw_output):
                 cls, reg, _ = model(image.float(), return_raw=True)
