@@ -107,7 +107,7 @@ def main(args=None):
 
     retinanet.training = True
 
-    optimizer = optim.Adam(retinanet.parameters(), lr=1e-4)
+    optimizer = optim.Adam(retinanet.parameters(), lr=1e-2)
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=3)
 
