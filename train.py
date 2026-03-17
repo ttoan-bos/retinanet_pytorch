@@ -8,10 +8,7 @@ from torchvision import transforms
 
 from retinanet import model
 from retinanet.dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, Normalizer, ResizerFixed224
-from torch.utils.data import DataLoader
-
-from retinanet import coco_eval
-from retinanet import csv_eval
+from torch.utils.data import DataLoader, Subset
 
 print('CUDA available: {}'.format(torch.cuda.is_available()))
 
@@ -22,7 +19,7 @@ def main(args=None):
     parser.add_argument('--dataset', help='Dataset type, must be one of csv or coco.')
     parser.add_argument('--coco_path', help='Path to COCO directory')
 
-    parser.add_argument('--depth', help='Resnet depth', type=int, default=50)
+    parser.add_argument('--depth', help='Resnet depth', type=int, default=18)
     parser.add_argument('--epochs', help='Number of epochs', type=int, default=100)
     parser.add_argument('--resume', help='Checkpoint path', default=None)
 
@@ -35,8 +32,9 @@ def main(args=None):
         if parser.coco_path is None:
             raise ValueError('Must provide --coco_path when training on COCO')
 
-        dataset_train = CocoDataset(parser.coco_path, set_name='train2017',
+        full_dataset = CocoDataset(parser.coco_path, set_name='train2017',
                                     transform=transforms.Compose([Normalizer(), Augmenter(), ResizerFixed224()]))
+        dataset_train = Subset(full_dataset, list(range(500)))
 
         dataset_val = CocoDataset(parser.coco_path, set_name='val2017',
                                   transform=transforms.Compose([Normalizer(), ResizerFixed224()]))
@@ -54,15 +52,15 @@ def main(args=None):
     start_epoch = 0
 
     if parser.depth == 18:
-        retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet18(num_classes=full_dataset.num_classes(), pretrained=True)
     elif parser.depth == 34:
-        retinanet = model.resnet34(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet34(num_classes=full_dataset.num_classes(), pretrained=True)
     elif parser.depth == 50:
-        retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet50(num_classes=full_dataset.num_classes(), pretrained=True)
     elif parser.depth == 101:
-        retinanet = model.resnet101(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet101(num_classes=full_dataset.num_classes(), pretrained=True)
     elif parser.depth == 152:
-        retinanet = model.resnet152(num_classes=dataset_train.num_classes(), pretrained=True)
+        retinanet = model.resnet152(num_classes=full_dataset.num_classes(), pretrained=True)
     else:
         raise ValueError('Unsupported model depth')
 
