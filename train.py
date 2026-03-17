@@ -99,8 +99,8 @@ def main(args=None):
 
         for iter_num, data in enumerate(dataloader_train):
             try:
-                if iter_num >= (500 // 16):
-                    break
+                # if iter_num >= (500 // 16):
+                #     break
 
                 optimizer.zero_grad()
 
