@@ -32,9 +32,8 @@ def main(args=None):
         if parser.coco_path is None:
             raise ValueError('Must provide --coco_path when training on COCO')
 
-        full_dataset = CocoDataset(parser.coco_path, set_name='train2017',
+        dataset_train = CocoDataset(parser.coco_path, set_name='train2017',
                                     transform=transforms.Compose([Normalizer(), Augmenter(), ResizerFixed224()]))
-        dataset_train = Subset(full_dataset, list(range(500)))
 
         dataset_val = CocoDataset(parser.coco_path, set_name='val2017',
                                   transform=transforms.Compose([Normalizer(), ResizerFixed224()]))
@@ -52,15 +51,15 @@ def main(args=None):
     start_epoch = 0
 
     if parser.depth == 18:
-        retinanet = model.resnet18(num_classes=full_dataset.num_classes(), pretrained=True)
+        retinanet = model.resnet18(num_classes=dataset_train.num_classes(), pretrained=True)
     elif parser.depth == 34:
-        retinanet = model.resnet34(num_classes=full_dataset.num_classes(), pretrained=True)
+        retinanet = model.resnet34(num_classes=dataset_train.num_classes(), pretrained=True)
     elif parser.depth == 50:
-        retinanet = model.resnet50(num_classes=full_dataset.num_classes(), pretrained=True)
+        retinanet = model.resnet50(num_classes=dataset_train.num_classes(), pretrained=True)
     elif parser.depth == 101:
-        retinanet = model.resnet101(num_classes=full_dataset.num_classes(), pretrained=True)
+        retinanet = model.resnet101(num_classes=dataset_train.num_classes(), pretrained=True)
     elif parser.depth == 152:
-        retinanet = model.resnet152(num_classes=full_dataset.num_classes(), pretrained=True)
+        retinanet = model.resnet152(num_classes=dataset_train.num_classes(), pretrained=True)
     else:
         raise ValueError('Unsupported model depth')
 
@@ -100,6 +99,8 @@ def main(args=None):
 
         for iter_num, data in enumerate(dataloader_train):
             try:
+                if iter_num >= (500 // 16):
+                    break
 
                 optimizer.zero_grad()
 
